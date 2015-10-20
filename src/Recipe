@@ -1,0 +1,18 @@
+libraries.venom{
+	sources = \
+		toxcore-gobject \
+		toxav-gobject.vala \
+		toxdns-gobject.vala \
+		vapi/libtoxdns.vapi \
+		vapi/libtoxav.vapi \
+		vapi/libtoxcore.vapi
+		
+	packages = \
+		gthread-2.0 \
+		gmodule-2.0 \
+		glib-2.0 >= 2.42.0 \
+		gio-2.0 >= 2.42.0 \
+		gee-0.8 >= 0.8.0 \
+		json-glib-1.0 \
+		libtoxcore
+}

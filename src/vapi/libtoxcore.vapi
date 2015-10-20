@@ -1,13 +1,13 @@
 /* -*- Mode: vala; tab-width: 4; intend-tabs-mode: t -*- */
 /* libtoxcore.vapi
- * This file is part of Venom
- * Copyright (C) 2015 Venom authors and contributors
- * Venom is free software: you can redistribute it and/or modify it
+ * This file is part of tox-gobject
+ * Copyright (C) 2015 tox-gobject authors and contributors
+ * tox-gobject is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * 
- * Venom is distributed in the hope that it will be useful, but
+ * tox-gobject is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
@@ -355,218 +355,8 @@ the following log is fucking insane and full of magic
 
 	}
 
-  	public errordomain OptionError{
-  		NOMEM,
-  	}
-  
-	public errordomain ConstructError{
-		/**
-		 * The function was unable to bind to a port. This may mean that all ports
-		 * have already been bound, e.g. by other Tox instances, or it may mean
-		 * a permission error. You may be able to gather more information from errno.
-		 */
-		BAD_PORT_ALLOC,
-		
-		/**
-		 * proxy_type was valid but the proxy_host passed had an invalid format
-		 * or was NULL.
-		 */
-		BAD_HOST,
-	
-		/**
-		 * proxy_type was valid, but the proxy_port was invalid.
-		 */
-		PORT_UNAVAILABLE,
-		
-		/**
-		 * The proxy address passed could not be resolved.
-		 */
-		PROXY_NOT_FOUND,
-	
-		/**
-		 * The byte array to be loaded contained an encrypted save.
-		 */
-		ENCRYPTED_DATA,
-	
-		/**
-		 * The data format was invalid. This can happen when loading data that was
-		 * saved by an older version of Tox, or when the data has been corrupted.
-		 * When loading from badly formatted data, some data may have been loaded,
-		 * and the rest is discarded. Passing an invalid length parameter also
-		 * causes this error.
-		 */
-		MALFORMED_DATA,
-		
-		UNKNOWN,
-	}
-	
-	public errordomain BootstrapError{
-		BAD_HOST,
-		BAD_PORT,
-	}
-		
-	public errordomain FriendAddError {
-		TOOLONG,
-		NO_MESSAGE,
-		OWN_KEY,
-		ALREADY_SENT,
-		UNKNOWN,
-		BAD_CHECKSUM,
-		SET_NEW_NOSPAM,
-		NOMEM,
-	}		
-	
-	public errordomain FriendGetError{
-		NOT_FOUND,
-		UNKNOWN,		
-	}
-		
-	public errordomain SendMessageError{
-	
-		/**
-		 * The friend number did not designate a valid friend.
-		 */
-		FRIEND_NOT_FOUND,
-
-		/**
-		 * This client is currently not connected to the friend.
-		 */
-		FRIEND_NOT_CONNECTED,
-
-		/**
-		 * An allocation error occurred while increasing the send queue size.
-		 */
-		SENDQ,
-
-
-	}
-	
-	public errordomain FileControlError{
-		/**
-		 * The friend_number passed did not designate a valid friend.
-		 */
-		FRIEND_NOT_FOUND,
-		
-		/**
-		 * This client is currently not connected to the friend.
-		 */
-		FRIEND_NOT_CONNECTED,
-		
-		/**
-		 * No file transfer with the given file number was found for the given friend.
-		 */
-		NOT_FOUND,
-		
-		/**
-		 * A RESUME control was sent, but the file transfer is running normally.
-		 */
-		NOT_PAUSED,
-	
-		/**
-		 * A RESUME control was sent, but the file transfer was paused by the other
-		 * party. Only the party that paused the transfer can resume it.
-		 */
-		DENIED,
-		
-		/**
-		 * A PAUSE control was sent, but the file transfer was already paused.
-		 */
-		ALREADY_PAUSED,
-		
-		/**
-		 * Packet queue is full.
-		 */
-		SENDQ,
-	
-	}
-	
-	public errordomain FileSeekError {
-		
-		/**
-		 * The friend_number passed did not designate a valid friend.
-		 */
-		FRIEND_NOT_FOUND,
-		
-		/**
-		 * This client is currently not connected to the friend.
-		 */
-		FRIEND_NOT_CONNECTED,
-		
-		/**
-		 * No file transfer with the given file number was found for the given friend.
-		 */
-		NOT_FOUND,
-		
-		/**
-		 * File was not in a state where it could be seeked.
-		 */
-		DENIED,
-		
-		/**
-		 * Seek position was invalid
-		 */
-		INVALID_POSITION,
-		
-		/**
-		 * Packet queue is full.
-		 */
-		SENDQ,
-
-	}
-	
-	public errordomain FileGetError{
-		/**
-	     * The friend_number passed did not designate a valid friend.
-	     */
-	    FRIEND_NOT_FOUND,
-
-	    /**
-	     * No file transfer with the given file number was found for the given friend.
-	     */
-    	NOT_FOUND,
-	
-	}
-	
-	public errordomain FileSendError{
-		FRIEND_NOT_FOUND,
-		FRIEND_NOT_CONNECTED,
-		TOO_MANY,
-	}
-	
-	public errordomain FileSendChunkError{
-		FRIEND_NOT_FOUND,
-		FRIEND_NOT_CONNECTED,
-		NOT_FOUND,
-		NOT_TRANSFERRING,
-		INVALID_LENGTH,
-		SENDQ,
-		WRONG_POSITION,
-	}
   	
-  	public errordomain CustomPacketError{
-  		/**
-		 * The friend number did not designate a valid friend.
-		 */
-		FRIEND_NOT_FOUND,
-		/**
-		 * This client is currently not connected to the friend.
-		 */
-		FRIEND_NOT_CONNECTED,
-		/**
-		 * The first byte of data was not in the specified range for the packet type.
-		 * This range is 200-254 for lossy, and 160-191 for lossless packets.
-		 */
-		INVALID,
-		/**
-		 * Packet data length exceeded TOX_MAX_CUSTOM_PACKET_SIZE.
-		 */
-		TOO_LONG,
-		/**
-		 * Packet queue is full.
-		 */
-		SENDQ,
-  	
-  	}
+	
 
 	[CCode (cname = "Tox_Options",  destroy_function = "tox_options_free", has_type_id = false)]
 	[Compact]
@@ -685,7 +475,7 @@ the following log is fucking insane and full of magic
 		public void restore_defaults();
 
 		[CCode (cname="tox_options_new")]
-		private static Options? options_new(out TOX_ERR_OPTIONS_NEW error);
+		public static Options? options_new(out TOX_ERR_OPTIONS_NEW error);
 		
 		/**
 		 * Allocates a new Tox_Options object and initialises it with the default
@@ -696,14 +486,7 @@ the following log is fucking insane and full of magic
 		 * @return A new Tox_Options object with default options or NULL on failure.
 		 */
 		
-		public static Options? create() throws OptionError{
-			TOX_ERR_OPTIONS_NEW en;
-			Options ret = options_new(out en);
-			if(en == TOX_ERR_OPTIONS_NEW.MALLOC){
-				throw new OptionError.NOMEM("Unable to allocate memory for ToxCore.Options object");
-			}
-			return ret;
-		}
+		
 		
 		
 	}

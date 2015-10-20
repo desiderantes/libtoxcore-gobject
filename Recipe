@@ -1,0 +1,15 @@
+project {
+	name = tox-gobject 
+	major = 0
+	minor = 1
+	patch = 0
+	version = $(project.major).$(project.minor).$(project.patch)
+	minimum-bake-version = 0.1.49
+}
+data.meta { 
+	files = README \
+			README.md \
+			AUTHORS \
+
+	install = false 
+}
