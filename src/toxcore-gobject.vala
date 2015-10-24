@@ -16,33 +16,25 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- using ToxCore;
- 
- public class Options: ToxCore.Options{
- 	public Options(){
-			TOX_ERR_OPTIONS_NEW en;
-			Options ret = ToxCore.Options.options_new(out en);
-			return ret;
-		}
- }
- 
- public class Tox{
+using ToxAPI;
+
+namespace Tox{
  	/**
 	 * The major version number. Incremented when the API or ABI changes in an
 	 * incompatible way.
 	 */
-	public const uint32 MAJOR = ToxCore.Version.MAJOR;
+	public const uint32 MAJOR = ToxAPI.Version.MAJOR;
 			/**
 	 * The minor version number. Incremented when functionality is added without
 	 * breaking the API or ABI. Set to 0 when the major version number is
 	 * incremented.
 	 */
-	public const uint32 MINOR = ToxCore.Version.MINOR;
+	public const uint32 MINOR = ToxAPI.Version.MINOR;
 	/**
 	 * The patch or revision number. Incremented when bugfixes are applied without
 	 * changing any functionality or API or ABI.
 	 */
-	public const uint32 PATCH = ToxCore.Version.PATCH;
+	public const uint32 PATCH = ToxAPI.Version.PATCH;
 
 	/**
 	 * A macro to check at preprocessing time whether the client code is compatible
@@ -50,14 +42,14 @@
 	 */
 	
 	public static bool is_api_compatible(uint32 major, uint32 minor, uint32 patch){
-		return ToxCore.Version.is_api_compatible(major,minor,patch);
+		return ToxAPI.Version.is_api_compatible(major,minor,patch);
 	}
 	/**
 	 * A macro to make compilation fail if the client code is not compatible with
 	 * the installed version of Tox.
 	 */
 	public static char require_version(uint32 major, uint32 minor, uint32 patch){
-		return ToxCore.Version.require_version(major, minor, patch);
+		return ToxAPI.Version.require_version(major, minor, patch);
 	}
 
 	/**	
@@ -67,7 +59,7 @@
 	 */	
 	
 	public static uint32 library_major(){
-		return ToxCore.Version.library_major();
+		return ToxAPI.Version.library_major();
 	}
 
 	/**
@@ -75,14 +67,14 @@
 	 */
 	
 	public static uint32 library_minor(){
-		return ToxCore.Version.library_minor();
+		return ToxAPI.Version.library_minor();
 	}
 	
 	/**
 	 * Return the patch number of the library.
 	 */
 	public static uint32 library_patch(){
-		return ToxCore.Version.library_patch();
+		return ToxAPI.Version.library_patch();
 	}
 	/**
 	 * Return whether the compiled library version is compatible with the passed
@@ -90,14 +82,14 @@
 	 */
 
 	public static bool is_compatible(uint32 major, uint32 minor, uint32 patch){
-		return ToxCore.Version.is_compatible(major,minor,patch);
+		return ToxAPI.Version.is_compatible(major,minor,patch);
 	}
 	/**
-	 * A convenience macro to call tox_version_is_compatible with the currently
+	 * A convenience macro to call ToxAPI.TOX_version_is_compatible with the currently
 	 * compiling API version.
 	 */
 	public static bool is_abi_compatible(){
-		return ToxCore.Version.is_abi_compatible();
+		return ToxAPI.Version.is_abi_compatible();
 	}
 	
 	
@@ -105,60 +97,73 @@
 	/**
 	 * The size of a Tox Public Key in bytes.
 	 */
-	public const int PUBLIC_KEY_SIZE = ToxCore.Version.PUBLIC_KEY_SIZE;
+	public const int PUBLIC_KEY_SIZE = ToxAPI.Version.PUBLIC_KEY_SIZE;
 
 	/**
 	 * The size of a Tox Secret Key in bytes.
 	 */
-	public const int SECRET_KEY_SIZE = ToxCore.Version.SECRET_KEY_SIZE;
+	public const int SECRET_KEY_SIZE = ToxAPI.Version.SECRET_KEY_SIZE;
 
 	/**
 	 * The size of a Tox address in bytes. Tox addresses are in the format
-	 * [Public Key (TOX_PUBLIC_KEY_SIZE bytes)][nospam (4 bytes)][checksum (2 bytes)].
+	 * [Public Key (ToxAPI.TOX_PUBLIC_KEY_SIZE bytes)][nospam (4 bytes)][checksum (2 bytes)].
 	 *
 	 * The checksum is computed over the Public Key and the nospam value. The first
 	 * byte is an XOR of all the even bytes (0, 2, 4, ...), the second byte is an
 	 * XOR of all the odd bytes (1, 3, 5, ...) of the Public Key and nospam.
 	 */
-	public const int ADDRESS_SIZE = ToxCore.Version.ADDRESS_SIZE;
+	public const int ADDRESS_SIZE = ToxAPI.Version.ADDRESS_SIZE;
 	/**
 	 * Maximum length of a nickname in bytes.
 	 */
-	public const int MAX_NAME_LENGTH = ToxCore.Version.MAX_NAME_LENGTH;
+	public const int MAX_NAME_LENGTH = ToxAPI.Version.MAX_NAME_LENGTH;
   
 	/**
 	 * Maximum length of a status message in bytes.
 	 */
-	public const int MAX_STATUS_MESSAGE_LENGTH = ToxCore.Version.MAX_STATUS_MESSAGE_LENGTH;
+	public const int MAX_STATUS_MESSAGE_LENGTH = ToxAPI.Version.MAX_STATUS_MESSAGE_LENGTH;
 
 	/**
 	 * Maximum length of a friend request message in bytes.
 	 */
-	public const int MAX_FRIEND_REQUEST_LENGTH = ToxCore.Version.MAX_FRIEND_REQUEST_LENGTH;
+	public const int MAX_FRIEND_REQUEST_LENGTH = ToxAPI.Version.MAX_FRIEND_REQUEST_LENGTH;
 	
 	/**
 	 * Maximum length of a single message after which it should be split.
 	 */
-	public const int MAX_MESSAGE_LENGTH = ToxCore.Version.MAX_MESSAGE_LENGTH;
+	public const int MAX_MESSAGE_LENGTH = ToxAPI.Version.MAX_MESSAGE_LENGTH;
 	/**
 	 * Maximum size of custom packets. TODO: should be LENGTH?
 	 */
-	public const int MAX_CUSTOM_PACKET_SIZE = ToxCore.Version.MAX_CUSTOM_PACKET_SIZE;
+	public const int MAX_CUSTOM_PACKET_SIZE = ToxAPI.Version.MAX_CUSTOM_PACKET_SIZE;
 
 	/**
-	 * The number of bytes in a hash generated by tox_hash.
+	 * The number of bytes in a hash generated by ToxAPI.TOX_hash.
 	 */
-	public const int HASH_LENGTH = ToxCore.Version.HASH_LENGTH;
+	public const int HASH_LENGTH = ToxAPI.Version.HASH_LENGTH;
 	/**
 	 * The number of bytes in a file id.
 	 */
-	public const int FILE_ID_LENGTH = ToxCore.Version.FILE_ID_LENGTH;
+	public const int FILE_ID_LENGTH = ToxAPI.Version.FILE_ID_LENGTH;
 
 	/**
 	 * Maximum file name length for file transfers.
 	 */
-	public const int MAX_FILENAME_LENGTH = ToxCore.Version.MAX_FILENAME_LENGTH;
+	public const int MAX_FILENAME_LENGTH = ToxAPI.Version.MAX_FILENAME_LENGTH;
 	
+	public enum UserStatus : ToxAPI.UserStatus{}
+	
+	public enum ConnectionStatus: ToxAPI.ConnectionStatus{}
+	
+	public enum FileControlStatus: ToxAPI.FileControlStatus{}
+	
+	public enum FileKind : ToxAPI.FileKind{}
+	
+	public enum MessageType : ToxAPI.MessageType {}
+	
+	public enum ProxyType : ToxAPI.ProxyType {}
+	
+	public enum SavedataType : ToxAPI.SavedataType{}
 	
 	public errordomain BootstrapError{
 		BAD_HOST,
@@ -318,7 +323,7 @@
 		 */
 		INVALID,
 		/**
-		 * Packet data length exceeded TOX_MAX_CUSTOM_PACKET_SIZE.
+		 * Packet data length exceeded MAX_CUSTOM_PACKET_SIZE.
 		 */
 		TOO_LONG,
 		/**
@@ -329,10 +334,138 @@
   	}
 	
 	
+	public class Options: ToxAPI.Options{
+ 		public Options(){
+			ToxAPI.TOX_ERR_OPTIONS_NEW en;
+			Options ret = (Options)ToxAPI.Options.options_new(out en);
+			return ret;
+		}
+	}
+	
+	public class Core{
+		private ToxAPI.ToxRaw? internal_handle;
+		
+		public uint32 nospam {
+			get{ return internal_handle.nospam;} 
+			set{ internal_handle.nospam = value;}
+		}
+		
+		public UserStatus status{
+			get{ return internal_handle.status;}
+			set{ internal_handle.status = (UserStatus) value}
+		}
+		
+		public string status_message{
+			get{ return internal_handle.get_status_message();}
+			set{
+				if (value.data.length <= MAX_STATUS_MESSAGE_LENGTH){
+					internal_handle.set_status_message(value);
+				}
+			}
+		}
+		
+		public string name{
+			get{ return internal_handle.get_name();}
+			set{
+				if (value.data.length <= MAX_NAME_LENGTH){
+					internal_handle.set_name(value);
+				}
+			}
+		}
+		
+		public uint8[] address{
+			get{ return internal_handle.get_address(); }
+		}
+		
+		public uint8[] public_key{
+			get{ return internal_handle.get_public_key(); }
+		}
+		
+		public ConnectionStatus connection_status{
+			get{ return internal_handle.get_connection_status(); }
+		}
+		
+		
+		
+		
+		
+		
+		public Core(Options? options = null ) throws ConstructError{
+			ToxAPI.ToxAPI.TOX_ERR_NEW err;
+			internal_handle = ToxAPI.ToxRaw.create(options, out en);
+			switch(err){
+				case ToxAPI.TOX_ERR_NEW.NULL:
+					throw new ConstructError.UNKNOWN("A parameter was null");
+					break;
+				case ToxAPI.TOX_ERR_NEW.MALLOC:
+					throw new ConstructError.UNKNOWN("Unable to allocate memory for the Tox instance");
+					break;
+				case ToxAPI.TOX_ERR_NEW.PORT_ALLOC:
+					throw new ConstructError.BAD_PORT_ALLOC( err.to_string() + ": Unable to seize the received port");
+					break;
+				case ToxAPI.TOX_ERR_NEW.PROXY_BAD_HOST:
+					throw new ConstructError.BAD_HOST("Invalid host (host was" + (options.proxy_host ?? "null") + ")");
+					break;
+				case ToxAPI.TOX_ERR_NEW.PROXY_BAD_PORT:
+					throw new ConstructError.PORT_UNAVAILABLE("Port not available (" + options.proxy_port.to_string() + ")");
+					break;
+				case ToxAPI.TOX_ERR_NEW.PROXY_NOT_FOUND:
+					throw new ConstructError.PROXY_NOT_FOUND("Unable to connect to the proxy (TYPE_" + options.proxy_type.to_string() + " : " + options.proxy_host ?? "null" + ")");
+					break;
+				case ToxAPI.TOX_ERR_NEW.LOAD_ENCRYPTED:
+					throw new ConstructError.ENCRYPTED_DATA("Data was unexpectedly encrypted or looks encrypted");
+					break;
+				case ToxAPI.TOX_ERR_NEW.LOAD_BAD_FORMAT:
+					throw new ConstructError.MALFORMED_DATA("Data was not properly formatted");
+					break;
+				default:
+					throw new ConstructError.UNKNOWN(err.to_string());
+					break;
+			}
+		}
+		
+		public uint8[] get_savedata(){
+			return internal_handle.get_savedata();
+		}
+		
+		public void bootstrap(string address, uint16 port, uint8[] public_key) throws BootstrapError{
+			ToxAPI.TOX_ERR_BOOTSTRAP err;
+			bool res = internal_handle.connect (address, port, public_key, out err);
+			if(!res){
+				switch(err){
+					case TOX_ERR_BOOTSTRAP.BAD_HOST:
+						throw new BootstrapError.BAD_HOST("Host " + address.to_string()+ " is invalid");
+						break;
+					case TOX_ERR_BOOTSTRAP.BAD_PORT:
+						throw new BootstrapError.BAD_PORT("Port "+ port.to_string()+ " not valid or unavailable");
+					default:
+						throw new BootstrapError.BAD_HOST("Unable to connect, please check bootstrap parameters");
+				}	
+			}
+		}
+		
+		public void add_tcp_relay(string address, uint16 port, uint8[] public_key) throws BootstrapError requires(public_key.length == PUBLIC_KEY_SIZE)  {
+			ToxAPI.TOX_ERR_BOOTSTRAP err = TOX_ERR_BOOTSTRAP.INVALID_ENUM;
+			bool res = internal_handle.add_tcp_relay (address, port, public_key, out err);
+			if(!res){
+				switch(err){
+					case TOX_ERR_BOOTSTRAP.BAD_HOST:
+						throw new BootstrapError.BAD_HOST("Relay Host " + address.to_string()+ " is invalid");
+						break;
+					case TOX_ERR_BOOTSTRAP.BAD_PORT:
+						throw new BootstrapError.BAD_PORT( "Port "+ port.to_string()+ " not valid or unavailable");
+						break;
+					case TOX_ERR_BOOTSTRAP.INVALID_ENUM:
+						throw new BootstrapError.BAD_HOST("Unable to connect, please check relay parameters");
+						break;
+				}	
+			}	
+		}
+		
+		
+	}
 	
 	
-	
-	private ToxCore.ToxRaw? handle;
 	
 		
  	

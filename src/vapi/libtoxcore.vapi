@@ -16,37 +16,17 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 [CCode (cheader_filename = "tox/tox.h", cprefix = "tox_")]
-namespace ToxCore {
+namespace ToxAPI {
 	
-/*before we start, i have to state that Vala string handling is both magical and insane
-at the same time.
-the following log is fucking insane and full of magic
-<flo> string str = "test";
-<flo> unowned uint8[] res = (uint8[]) str;
-<flo> and then you have to correct the length of res
-<flo> res.length = (int) str.length + 1;
-<flo> and to get a string, you just have to cast it and you can use a owned variable
-<flo> string str2 = (string) res;
-<flo> res is interpreted as a char* in C and as str2 is owned, it generates a str_dup function in background
-<flo> and as res already contains \0, you don't have to do anything else
-<flo> the unowned is important.
-<flo> in case you need res as owned variable, just copy it. (uint8[] foo = res; after you corrected the size)
-*/
-	public string arr2str(uint8[] array){
-		uint8[] name = new uint8[array.length + 1];
-		GLib.Memory.copy(name, array, sizeof(uint8)* name.length);
-		name[array.length] = '\0';
-		return ((string) name).to_string();
-	}
 	[CCode (cprefix = "TOX_VERSION_")]
 	namespace Version {
-		
+
 		/**
 		 * The major version number. Incremented when the API or ABI changes in an
 		 * incompatible way.
 		 */
 		public uint32 MAJOR;
-	
+
 		/**
 		 * The minor version number. Incremented when functionality is added without
 		 * breaking the API or ABI. Set to 0 when the major version number is
@@ -363,7 +343,7 @@ the following log is fucking insane and full of magic
 	public class Options {
 	
 		[CCode(cname="TOX_ERR_OPTIONS_NEW", cprefix="TOX_ERR_OPTIONS_NEW_", has_type_id=false)]
-		private enum TOX_ERR_OPTIONS_NEW {
+		protected enum TOX_ERR_OPTIONS_NEW {
 		
 			/**
 			 * The function returned successfully.
@@ -677,42 +657,9 @@ the following log is fucking insane and full of magic
 		 * @return A new Tox instance pointer on success or null on failure.
 		 */	
 		[CCode (cname="tox_new")]
-		private static ToxRaw? _new(Options? options, out TOX_ERR_NEW err);
+		private static ToxRaw? create(Options? options, out TOX_ERR_NEW err);
 	 	
-		public static ToxRaw? create(Options? options = null) throws ConstructError{
-			TOX_ERR_NEW err;
-			Tox? ret = _new(options, out err);
-			switch(err){
-				case TOX_ERR_NEW.NULL:
-					throw new ConstructError.UNKNOWN("A parameter was null");
-					break;
-				case TOX_ERR_NEW.MALLOC:
-					throw new ConstructError.UNKNOWN("Unable to allocate memory for the Tox instance");
-					break;
-				case TOX_ERR_NEW.PORT_ALLOC:
-					throw new ConstructError.BAD_PORT_ALLOC( err.to_string() + ": Unable to seize the received port");
-					break;
-				case TOX_ERR_NEW.PROXY_BAD_HOST:
-					throw new ConstructError.BAD_HOST("Invalid host (host was" + (options.proxy_host ?? "null") + ")");
-					break;
-				case TOX_ERR_NEW.PROXY_BAD_PORT:
-					throw new ConstructError.PORT_UNAVAILABLE("Port not available (" + options.proxy_port.to_string() + ")");
-					break;
-				case TOX_ERR_NEW.PROXY_NOT_FOUND:
-					throw new ConstructError.PROXY_NOT_FOUND("Unable to connect to the proxy (TYPE_" + options.proxy_type.to_string() + " : " + options.proxy_host ?? "null" + ")");
-					break;
-				case TOX_ERR_NEW.LOAD_ENCRYPTED:
-					throw new ConstructError.ENCRYPTED_DATA("Data was unexpectedly encrypted or looks encrypted");
-					break;
-				case TOX_ERR_NEW.LOAD_BAD_FORMAT:
-					throw new ConstructError.MALFORMED_DATA("Data was not properly formatted");
-					break;
-				default:
-					throw new ConstructError.UNKNOWN(err.to_string());
-					break;
-			}
-			return ret;
-		}
+		
 
 		
 		
@@ -737,23 +684,8 @@ the following log is fucking insane and full of magic
 		 * @return true on success.
 		 */
 		[CCode (cname="tox_bootstrap")]
-		private bool connect(string address, uint16 port, [CCode(array_length=false)] uint8[] public_key, out TOX_ERR_BOOTSTRAP err);
-		[CCode (cname="vala_tox_bootstrap")]
-		public void bootstrap(string address, uint16 port, uint8[] public_key) throws BootstrapError{
-			TOX_ERR_BOOTSTRAP err;
-			bool res = connect (address, port, public_key, out err);
-			if(!res){
-				switch(err){
-					case TOX_ERR_BOOTSTRAP.BAD_HOST:
-						throw new BootstrapError.BAD_HOST("Host " + address.to_string()+ " is invalid");
-						break;
-					case TOX_ERR_BOOTSTRAP.BAD_PORT:
-						throw new BootstrapError.BAD_PORT("Port "+ port.to_string()+ " not valid or unavailable");
-					default:
-						throw new BootstrapError.BAD_HOST("Unable to connect, please check bootstrap parameters");
-				}	
-			}
-		}
+		public bool connect(string address, uint16 port, [CCode(array_length=false)] uint8[] public_key, out TOX_ERR_BOOTSTRAP err);
+		
 		/**
 		 * Adds additional host:port pair as TCP relay.
 		 *
@@ -768,25 +700,8 @@ the following log is fucking insane and full of magic
 		 * @return true on success.
 		 */
 		[CCode (cname="tox_add_tcp_relay")]
-		private bool _add_tcp_relay(string address, uint16 port, [CCode(array_length=false)] uint8[] public_key, out TOX_ERR_BOOTSTRAP err);
-		[CCode (cname="vala_tox_add_tcp_relay")]
-		public void add_tcp_relay(string address, uint16 port, uint8[] public_key) throws BootstrapError requires(public_key.length == PUBLIC_KEY_SIZE)  {
-			TOX_ERR_BOOTSTRAP err = TOX_ERR_BOOTSTRAP.INVALID_ENUM;
-			bool res = _add_tcp_relay (address, port, public_key, out err);
-			if(!res){
-				switch(err){
-					case TOX_ERR_BOOTSTRAP.BAD_HOST:
-						throw new BootstrapError.BAD_HOST("Relay Host " + address.to_string()+ " is invalid");
-						break;
-					case TOX_ERR_BOOTSTRAP.BAD_PORT:
-						throw new BootstrapError.BAD_PORT( "Port "+ port.to_string()+ " not valid or unavailable");
-						break;
-					case TOX_ERR_BOOTSTRAP.INVALID_ENUM:
-						throw new BootstrapError.BAD_HOST("Unable to connect, please check relay parameters");
-						break;
-				}	
-			}	
-		}
+		public bool add_tcp_relay(string address, uint16 port, [CCode(array_length=false)] uint8[] public_key, out TOX_ERR_BOOTSTRAP err);
+		
 		
 		/**
 		 * Return whether we are connected to the DHT. The return value is equal to the
