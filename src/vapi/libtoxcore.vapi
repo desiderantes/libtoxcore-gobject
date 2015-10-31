@@ -25,20 +25,20 @@ namespace ToxAPI {
 		 * The major version number. Incremented when the API or ABI changes in an
 		 * incompatible way.
 		 */
-		public uint32 MAJOR;
+		public const uint32 MAJOR;
 
 		/**
 		 * The minor version number. Incremented when functionality is added without
 		 * breaking the API or ABI. Set to 0 when the major version number is
 		 * incremented.
 		 */
-		public uint32 MINOR;
+		public const uint32 MINOR;
 
 		/**
 		 * The patch or revision number. Incremented when bugfixes are applied without
 		 * changing any functionality or API or ABI.
 		 */
-		public uint32 PATCH;
+		public const uint32 PATCH;
 	
 		/**
 		 * A macro to check at preprocessing time whether the client code is compatible
@@ -501,7 +501,7 @@ namespace ToxAPI {
 		 * @see TOX_ADDRESS_SIZE for the address format.
 		 */
 		private void self_get_address([CCode (array_length= false)] uint8[] address);
-		public uint8[] get_address(){
+		public  uint8[] get_address(){
 			uint8[] add = new uint8[ToxCore.ADDRESS_SIZE];
 			self_get_address(add);
 			return add;
