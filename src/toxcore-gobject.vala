@@ -383,7 +383,7 @@ namespace Tox{
 		}
 	}
 	
-	public class Core{
+	public class Core : Object{
 		private ToxAPI.ToxRaw? internal_handle;
 		
 		public uint32 nospam {
@@ -427,13 +427,9 @@ namespace Tox{
 		}
 		
 		
-		
-		
-		
-		
 		public Core(Options? options = null ) throws ConstructError{
 			ToxAPI.TOX_ERR_NEW err;
-			internal_handle = ToxAPI.ToxRaw.create(options, out en);
+			internal_handle = ToxAPI.ToxRaw.create(options, out err);
 			switch(err){
 				case ToxAPI.TOX_ERR_NEW.NULL:
 					throw new ConstructError.UNKNOWN("A parameter was null");
@@ -460,9 +456,9 @@ namespace Tox{
 					throw new ConstructError.MALFORMED_DATA("Data was not properly formatted");
 					break;
 				default:
-					throw new ConstructError.UNKNOWN(err.to_string());
 					break;
 			}
+			 this.connection_status_callback((raw, status)=>{this.notify_property("connection_status")});
 		}
 		
 		public uint8[] get_savedata(){
@@ -496,8 +492,7 @@ namespace Tox{
 					case TOX_ERR_BOOTSTRAP.BAD_PORT:
 						throw new BootstrapError.BAD_PORT( "Port "+ port.to_string()+ " not valid or unavailable");
 						break;
-					case TOX_ERR_BOOTSTRAP.INVALID_ENUM:
-						throw new BootstrapError.BAD_HOST("Unable to connect, please check relay parameters");
+					default:
 						break;
 				}	
 			}	
