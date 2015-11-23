@@ -767,35 +767,9 @@ namespace ToxAPI {
 		 *
 		 * @return the friend number on success, UINT32_MAX on failure.
 		 */
-		private uint32 friend_add([CCode (array_length=false)]  uint8[] address,  uint8[] message, out TOX_ERR_FRIEND_ADD err);
-		public uint32 add_friend(uint8[] address, string message) throws FriendAddError
-									requires(message.data.length <= MAX_FRIEND_REQUEST_LENGTH)
-									requires(message.data.length >0)
-									requires(address.length == ADDRESS_SIZE){
-			TOX_ERR_FRIEND_ADD err = TOX_ERR_FRIEND_ADD.INVALID_ENUM;
-			uint32 num = friend_add(address, message.data, out err);
-			switch(err){
-				case TOX_ERR_FRIEND_ADD.OWN_KEY:
-					throw new FriendAddError.OWN_KEY("The provided key is the same client key");
-					break;
-				case TOX_ERR_FRIEND_ADD.ALREADY_SENT:
-					throw new FriendAddError.ALREADY_SENT("The provided key belongs to an already addede friend");
-					break;
-				case TOX_ERR_FRIEND_ADD.BAD_CHECKSUM:
-					throw new FriendAddError.BAD_CHECKSUM("Checksum was invalid");
-					break;
-				case TOX_ERR_FRIEND_ADD.SET_NEW_NOSPAM:
-					throw new FriendAddError.SET_NEW_NOSPAM("Client was already added, changed the nospam value");
-					break;
-				case TOX_ERR_FRIEND_ADD.MALLOC:
-					throw new FriendAddError.NOMEM("Error allocating the friend request");
-					break;
-				case TOX_ERR_FRIEND_ADD.INVALID_ENUM:
-					throw new FriendAddError.UNKNOWN("Unknown error, please check the request parameters");
-					break;
-			}
-			return num;
-		}
+		[CCode cname="tox_friend_add"]
+		public uint32 friend_add([CCode (array_length=false)]  uint8[] address,  uint8[] message, out TOX_ERR_FRIEND_ADD err);
+
 		/**
 		 * Add a friend without sending a friend request.
 		 *
@@ -814,33 +788,11 @@ namespace ToxAPI {
 		 * @return the friend number on success, UINT32_MAX on failure.
 		 * @see tox_friend_add for a more detailed description of friend numbers.
 		 */
-		private uint32 friend_add_norequest([CCode (array_length = false)] uint8[] public_key, out TOX_ERR_FRIEND_ADD err);
-		public uint32 add_friend_norequest( uint8[] public_key) throws FriendAddError{
-			TOX_ERR_FRIEND_ADD err = TOX_ERR_FRIEND_ADD.INVALID_ENUM;
-			uint32 num = friend_add_norequest(public_key, out err);
-			switch(err){
-				case TOX_ERR_FRIEND_ADD.OWN_KEY:
-					throw new FriendAddError.OWN_KEY("The provided key is the same client key");
-					break;
-				case TOX_ERR_FRIEND_ADD.ALREADY_SENT:
-					throw new FriendAddError.ALREADY_SENT("The provided key belongs to an already addede friend");
-					break;
-				case TOX_ERR_FRIEND_ADD.BAD_CHECKSUM:
-					throw new FriendAddError.BAD_CHECKSUM("Checksum was invalid");
-					break;
-				case TOX_ERR_FRIEND_ADD.SET_NEW_NOSPAM:
-					throw new FriendAddError.SET_NEW_NOSPAM("Client was already added, changed the nospam value");
-					break;
-				case TOX_ERR_FRIEND_ADD.MALLOC:
-					throw new FriendAddError.NOMEM("Error allocating the friend request");
-				case TOX_ERR_FRIEND_ADD.INVALID_ENUM:
-					throw new FriendAddError.UNKNOWN("Unknown error, please check the request parameters");
-					break;
-			}
-			return num;
-		}
-		
-		
+		[CCode cname="tox_friend_add_norequest" ]
+		public uint32 friend_add_norequest([CCode (array_length = false)] uint8[] public_key, out TOX_ERR_FRIEND_ADD err);
+
+
+
 		/**
 		 * Remove a friend from the friend list.
 		 *
@@ -852,15 +804,13 @@ namespace ToxAPI {
 		 *
 		 * @return true on success.
 		 */
-		private bool friend_delete(uint32 friend_number, out TOX_ERR_FRIEND_DELETE err);
+		 [CCode cname="tox_friend_delete"]
+		public bool friend_delete(uint32 friend_number, out TOX_ERR_FRIEND_DELETE err);
 
-		public bool delete_friend(uint32 friend_number){
-			TOX_ERR_FRIEND_DELETE err;
-			return friend_delete(friend_number, out err);
-		}
-		
-		
-		
+
+
+
+
 		/*******************************************************************************
 		 *
 		 * :: Friend list queries
@@ -897,7 +847,7 @@ namespace ToxAPI {
 		 * This function can be used to determine how much memory to allocate for
 		 * tox_self_get_friend_list.
 		 */
-		private size_t self_get_friend_list_size();
+		public size_t self_get_friend_list_size();
 
 		/**
 		 * Copy a list of valid friend numbers into an array.
@@ -907,15 +857,10 @@ namespace ToxAPI {
 		 * @param list A memory region with enough space to hold the friend list. If
 		 *   this parameter is NULL, this function has no effect.
 		 */
-		private void self_get_friend_list([CCode (array_length = false)] uint32[] friend_list);
-		
-		[CCode (cname="vala_tox_get_friend_list")]
-		public uint32[] get_friend_list(){
-			uint32[] retval = new uint32[self_get_friend_list_size()];
-			self_get_friend_list(retval);
-			return retval;
-		}
-		
+		public void self_get_friend_list([CCode (array_length = false)] uint32[] friend_list);
+
+
+
 		/**
 		 * Copies the Public Key associated with a given friend number to a byte array.
 		 *

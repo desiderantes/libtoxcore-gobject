@@ -426,7 +426,11 @@ namespace Tox{
 			get{ return internal_handle.get_connection_status(); }
 		}
 		
-		
+		public uint32 iteration_interval{
+			get{ return internal_handle.iteration_interval();}
+		}
+
+
 		public Core(Options? options = null ) throws ConstructError{
 			ToxAPI.TOX_ERR_NEW err;
 			internal_handle = ToxAPI.ToxRaw.create(options, out err);
@@ -465,6 +469,20 @@ namespace Tox{
 			return internal_handle.get_savedata();
 		}
 		
+
+		/**
+		 * Sends a "get nodes" request to the given bootstrap node with IP, port, and
+		 * public key to setup connections.
+		 *
+		 * This function will attempt to connect to the node using UDP. You must use
+		 * this function even if Tox_Options.udp_enabled was set to false.
+		 *
+		 * @param address The hostname or IP address (IPv4 or IPv6) of the node.
+		 * @param port The port on the host on which the bootstrap Tox instance is
+		 *   listening.
+		 * @param public_key The long term public key of the bootstrap node
+		 * @throws BootstrapError.
+		 */
 		public void bootstrap(string address, uint16 port, uint8[] public_key) throws BootstrapError{
 			ToxAPI.TOX_ERR_BOOTSTRAP err;
 			bool res = internal_handle.connect (address, port, public_key, out err);
@@ -481,8 +499,21 @@ namespace Tox{
 			}
 		}
 		
+
+		/**
+		 * Adds additional host:port pair as TCP relay.
+		 *
+		 * This function can be used to initiate TCP connections to different ports on
+		 * the same bootstrap node, or to add TCP relays without using them as
+		 * bootstrap nodes.
+		 *
+		 * @param address The hostname or IP address (IPv4 or IPv6) of the TCP relay.
+		 * @param port The port on the host on which the TCP relay is listening.
+		 * @param public_key The long term public key of the TCP relay
+		 * @throws BootstrapError
+		 */
 		public void add_tcp_relay(string address, uint16 port, uint8[] public_key) throws BootstrapError requires(public_key.length == PUBLIC_KEY_SIZE)  {
-			ToxAPI.TOX_ERR_BOOTSTRAP err = TOX_ERR_BOOTSTRAP.INVALID_ENUM;
+			ToxAPI.TOX_ERR_BOOTSTRAP err = ToxAPI.TOX_ERR_BOOTSTRAP.INVALID_ENUM;
 			bool res = internal_handle.add_tcp_relay (address, port, public_key, out err);
 			if(!res){
 				switch(err){
@@ -498,7 +529,151 @@ namespace Tox{
 			}	
 		}
 		
+		public void iterate(){
+			internal_handle.iterate();
+		}
+
+		/**
+		 * Add a friend to the friend list and send a friend request.
+		 *
+		 * A friend request message must be at least 1 byte long and at most
+		 * MAX_FRIEND_REQUEST_LENGTH.
+		 *
+		 * Friend numbers are unique identifiers used in all functions that operate on
+		 * friends. Once added, a friend number is stable for the lifetime of the Tox
+		 * object. After saving the state and reloading it, the friend numbers may not
+		 * be the same as before. Deleting a friend creates a gap in the friend number
+		 * set, which is filled by the next adding of a friend. Any pattern in friend
+		 * numbers should not be relied on.
+		 *
+		 * If more than uint32.MAX friends are added, this function causes undefined
+		 * behaviour.
+		 *
+		 * @param address The address of the friend (returned by tox_self_get_address of
+		 *   the friend you wish to add) it must be ADDRESS_SIZE bytes.
+		 * @param message The message that will be sent along with the friend request.
+		 *
+		 * @return the friend number on success, uint32.MAX on failure.
+		 */
+		public uint32 add_friend(uint8[] address, string message) throws FriendAddError
+									requires(message.data.length <= MAX_FRIEND_REQUEST_LENGTH)
+									requires(message.data.length >0)
+									requires(address.length == ADDRESS_SIZE){
+			ToxAPI.TOX_ERR_FRIEND_ADD err = ToxAPI.TOX_ERR_FRIEND_ADD.INVALID_ENUM;
+			uint32 num = internal_handle.friend_add(address, message.data, out err);
+			switch(err){
+				case TOX_ERR_FRIEND_ADD.OWN_KEY:
+					throw new FriendAddError.OWN_KEY("The provided key is the same client key");
+					break;
+				case TOX_ERR_FRIEND_ADD.ALREADY_SENT:
+					throw new FriendAddError.ALREADY_SENT("The provided key belongs to an already addede friend");
+					break;
+				case TOX_ERR_FRIEND_ADD.BAD_CHECKSUM:
+					throw new FriendAddError.BAD_CHECKSUM("Checksum was invalid");
+					break;
+				case TOX_ERR_FRIEND_ADD.SET_NEW_NOSPAM:
+					throw new FriendAddError.SET_NEW_NOSPAM("Client was already added, changed the nospam value");
+					break;
+				case TOX_ERR_FRIEND_ADD.MALLOC:
+					throw new FriendAddError.NOMEM("Error allocating the friend request");
+					break;
+				default:
+					break;
+			}
+			return num;
+		}
+
+
+		/**
+		 * Add a friend without sending a friend request.
+		 *
+		 * This function is used to add a friend in response to a friend request. If the
+		 * client receives a friend request, it can be reasonably sure that the other
+		 * client added this client as a friend, eliminating the need for a friend
+		 * request.
+		 *
+		 * This function is also useful in a situation where both instances are
+		 * controlled by the same entity, so that this entity can perform the mutual
+		 * friend adding. In this case, there is no need for a friend request, either.
+		 *
+		 * @param public_key A byte array of length TOX_PUBLIC_KEY_SIZE containing the
+		 *   Public Key (not the Address) of the friend to add.
+		 *
+		 * @return the friend number on success, UINT32_MAX on failure.
+		 * @see tox_friend_add for a more detailed description of friend numbers.
+		 */
+		public uint32 add_friend_norequest( uint8[] public_key) throws FriendAddError{
+			ToxAPI.TOX_ERR_FRIEND_ADD err = ToxAPI.TOX_ERR_FRIEND_ADD.INVALID_ENUM;
+			uint32 num = internal_handle.friend_add_norequest(public_key, out err);
+			switch(err){
+				case TOX_ERR_FRIEND_ADD.OWN_KEY:
+					throw new FriendAddError.OWN_KEY("The provided key is the same client key");
+					break;
+				case TOX_ERR_FRIEND_ADD.ALREADY_SENT:
+					throw new FriendAddError.ALREADY_SENT("The provided key belongs to an already addede friend");
+					break;
+				case TOX_ERR_FRIEND_ADD.BAD_CHECKSUM:
+					throw new FriendAddError.BAD_CHECKSUM("Checksum was invalid");
+					break;
+				case TOX_ERR_FRIEND_ADD.SET_NEW_NOSPAM:
+					throw new FriendAddError.SET_NEW_NOSPAM("Client was already added, changed the nospam value");
+					break;
+				case TOX_ERR_FRIEND_ADD.MALLOC:
+					throw new FriendAddError.NOMEM("Error allocating the friend request");
+				default:
+					break;
+			}
+			return num;
+		}
+
+
+		/**
+		 * Remove a friend from the friend list.
+		 *
+		 * This does not notify the friend of their deletion. After calling this
+		 * function, this client will appear offline to the friend and no communication
+		 * can occur between the two.
+		 *
+		 * @param friend_number Friend number for the friend to be deleted.
+		 *
+		 * @return true on success.
+		 */
+		public bool delete_friend(uint32 friend_number){
+			ToxAPI.TOX_ERR_FRIEND_DELETE err;
+			return internal_handle.friend_delete(friend_number, out err);
+		}
 		
+
+
+
+		/**
+		 * Return the friend number associated with that Public Key.
+		 *
+		 * @return the friend number on success, uint32.MAX on failure.
+		 * @param public_key A byte array containing the Public Key.
+		 * @throws FriendGetError
+		 */
+		public uint32 get_friend_by_public_key( uint8[] public_key) throws FriendGetError{
+			ToxAPI.TOX_ERR_FRIEND_BY_PUBLIC_KEY err;
+			uint32 retval = internal_handle.friend_by_public_key(public_key, out err);
+			switch (err){
+				case TOX_ERR_FRIEND_BY_PUBLIC_KEY.NOT_FOUND:
+				 	throw new FriendGetError.NOT_FOUND("The provided pubkey does not belong to a friend");
+				 default:
+				 	break;
+			}
+			return retval;
+		}
+
+
+
+		public uint32[] get_friend_list(){
+			uint32[] retval = new uint32[internal_handle.self_get_friend_list_size()];
+			internal_handle.self_get_friend_list(retval);
+			return retval;
+		}
+
+
 	}
 	
 	
