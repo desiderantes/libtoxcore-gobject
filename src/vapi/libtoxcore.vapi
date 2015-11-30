@@ -464,11 +464,7 @@ namespace ToxAPI {
 		 * function.
 		 *
 		 * @return A new Tox_Options object with default options or NULL on failure.
-		 */
-		
-		
-		
-		
+		 */	
 	}
 
 
@@ -823,18 +819,8 @@ namespace ToxAPI {
 		 * @param public_key A byte array containing the Public Key.
 		 * @throws FriendGetError
 		 */
-		private uint32 friend_by_public_key([CCode (array_length = false)] uint8[] public_key, out TOX_ERR_FRIEND_BY_PUBLIC_KEY error);
-		public uint32 get_friend_by_public_key( uint8[] public_key) throws FriendGetError{
-			TOX_ERR_FRIEND_BY_PUBLIC_KEY err;
-			uint32 retval = friend_by_public_key(public_key, out err);
-			switch (err){
-				case TOX_ERR_FRIEND_BY_PUBLIC_KEY.NOT_FOUND:
-				 	throw new FriendGetError.NOT_FOUND("The provided pubkey does not belong to a friend");
-				 default: 
-				 	break;
-			}
-			return retval;
-		}
+		public uint32 friend_by_public_key([CCode (array_length = false)] uint8[] public_key, out TOX_ERR_FRIEND_BY_PUBLIC_KEY error);
+		
 		/**
 		 * Checks if a friend with the given friend number exists and returns true if
 		 * it does.

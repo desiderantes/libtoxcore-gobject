@@ -422,6 +422,10 @@ namespace Tox{
 			owned get{ return internal_handle.get_public_key(); }
 		}
 		
+		public owned uint8[] secret_key{
+			owned get { return internal_handle.get_secret_key}
+		}
+		
 		public ConnectionStatus connection_status{
 			get{ return internal_handle.get_connection_status(); }
 		}
@@ -596,10 +600,10 @@ namespace Tox{
 		 * controlled by the same entity, so that this entity can perform the mutual
 		 * friend adding. In this case, there is no need for a friend request, either.
 		 *
-		 * @param public_key A byte array of length TOX_PUBLIC_KEY_SIZE containing the
+		 * @param public_key A byte array of length PUBLIC_KEY_SIZE containing the
 		 *   Public Key (not the Address) of the friend to add.
 		 *
-		 * @return the friend number on success, UINT32_MAX on failure.
+		 * @return the friend number on success, uint32.MAX on failure.
 		 * @see tox_friend_add for a more detailed description of friend numbers.
 		 */
 		public uint32 add_friend_norequest( uint8[] public_key) throws FriendAddError{
@@ -663,6 +667,14 @@ namespace Tox{
 				 	break;
 			}
 			return retval;
+		}
+		
+		/**
+		 * Checks if a friend with the given friend number exists and returns true if
+		 * it does.
+		 */
+		public bool friend_exists(uint32 friend_number){
+			return internal_handle.friend_exists(friend_number);
 		}
 
 
